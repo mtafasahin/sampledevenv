@@ -1,0 +1,24 @@
+# Node.js artifacts
+node_modules
+npm-debug.log
+yarn-error.log
+app/client/node_modules
+
+# Angular CLI configuration
+.angular
+.angular.json
+.angular-cli.json
+
+# Compiled output
+dist
+
+# Editor artifacts
+.idea
+.vscode
+
+# Dependency lock files
+package-lock.json
+yarn.lock
+
+# Test and coverage results
+coverage

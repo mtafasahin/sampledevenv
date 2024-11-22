@@ -1,0 +1,131 @@
+version: '3.8'
+
+services:
+  # dotnet-api:
+  #   container_name: dotnet_api_6_dev
+  #   build:
+  #     context: .
+  #     dockerfile: ./dotnet-api/Dockerfile.Dotnet
+  #   ## image: dotnet-6:latest
+  #   ports:
+  #     - "8002:8002"
+  #   volumes:
+  #     - ./dotnet-api/app:/app
+  #   environment:
+  #     - ASPNETCORE_ENVIRONMENT=Development
+  #     - ASPNETCORE_URLS=http://+:8002
+  #   depends_on:
+  #     - postgres
+  #   networks:
+  #     - mynetwork
+
+  redis:
+    image: "redis:latest"
+    container_name: redis-container
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis/redis-data:/data
+    restart: always    
+    networks:
+      - mynetwork    
+
+  rabbitmq:
+    image: "rabbitmq:3-management"
+    container_name: "rabbitmq-container"
+    ports:
+      - "5672:5672"   # RabbitMQ default AMQP port
+      - "15672:15672" # RabbitMQ Management Plugin port
+    volumes:
+      - .rabbit/rabbitmq_data:/var/lib/rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: kduser
+      RABBITMQ_DEFAULT_PASS: kdP4ssw0rd
+    restart: always 
+    networks:
+      - mynetwork
+  # angular-app:
+  #   container_name: angular-app
+  #   build:
+  #     context: .
+  #     dockerfile: ./angular/Dockerfile.Angular
+  #   image: your-angular-app-image:latest
+  #   ports:
+  #     - "4200:4200"
+  #   volumes:
+  #     - ./angular/app:/app
+  #   # command: ["npm", "start", "--host", "0.0.0.0"]
+  #   depends_on:
+  #     - dotnet-api
+  #   networks:
+  #     - mynetwork
+
+  # kibana:
+  #   container_name: kibana
+  #   image: docker.elastic.co/kibana/kibana:8.14.3
+  #   ports:
+  #     - 5601:5601
+  #   depends_on:
+  #     - elasticsearch
+  #   environment:
+  #     - ELASTICSEARCH_URL=http://els:9200
+  #   networks:
+  #     - mynetwork
+
+  # elasticsearch:
+  #   container_name: els
+  #   image: docker.elastic.co/elasticsearch/elasticsearch:8.14.3
+  #   ports:
+  #     - 9200:9200
+  #   volumes:
+  #     - ./elasticsearch-data:/usr/share/elasticsearch/datafile
+  #   environment:
+  #     - discovery.type=single-node
+  #   networks:
+  #     - mynetwork
+
+
+  postgres:
+    container_name: pg_container_dev
+    image: postgres:14
+    restart: always
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: booksdb
+    ports:
+      - 5432:5432
+    volumes:
+     - ./postgres/dbdata1:/var/lib/postgresql/data
+     - ./postgres/fdw:/fdw
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U root -d booksdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - mynetwork  
+
+  pgadmin:
+    build:
+      context: .
+      dockerfile: ./pgadmin/Dockerfile.PgAdmin
+    networks:
+      - mynetwork
+    ports:
+      - "5050:5050"
+    depends_on:
+      - postgres
+
+  # nginx:
+  #   build:
+  #     context: ./nginx
+  #   ports:
+  #     - "80:80"
+  #   networks:
+  #     - mynetwork
+
+networks:   
+  mynetwork:
+    driver: bridge
+
