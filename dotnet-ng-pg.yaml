@@ -19,46 +19,47 @@ services:
     networks:
       - mynetwork
 
-  redis:
-    image: "redis:latest"
-    container_name: redis-container
-    ports:
-      - "6379:6379"
-    volumes:
-      - ./redis/redis-data:/data
-    restart: always    
-    networks:
-      - mynetwork    
-
-  rabbitmq:
-    image: "rabbitmq:3-management"
-    container_name: "rabbitmq-container"
-    ports:
-      - "5672:5672"   # RabbitMQ default AMQP port
-      - "15672:15672" # RabbitMQ Management Plugin port
-    volumes:
-      - .rabbit/rabbitmq_data:/var/lib/rabbitmq
-    environment:
-      RABBITMQ_DEFAULT_USER: kduser
-      RABBITMQ_DEFAULT_PASS: kdP4ssw0rd
-    restart: always 
-    networks:
-      - mynetwork
-  # angular-app:
-  #   container_name: angular-app
-  #   build:
-  #     context: .
-  #     dockerfile: ./angular/Dockerfile.Angular
-  #   image: your-angular-app-image:latest
+  # redis:
+  #   image: "redis:latest"
+  #   container_name: redis-container
   #   ports:
-  #     - "4200:4200"
+  #     - "6379:6379"
   #   volumes:
-  #     - ./angular/app:/app
-  #   # command: ["npm", "start", "--host", "0.0.0.0"]
-  #   depends_on:
-  #     - dotnet-api
+  #     - ./redis/redis-data:/data
+  #   restart: always    
+  #   networks:
+  #     - mynetwork    
+
+  # rabbitmq:
+  #   image: "rabbitmq:3-management"
+  #   container_name: "rabbitmq-container"
+  #   ports:
+  #     - "5672:5672"   # RabbitMQ default AMQP port
+  #     - "15672:15672" # RabbitMQ Management Plugin port
+  #   volumes:
+  #     - .rabbit/rabbitmq_data:/var/lib/rabbitmq
+  #   environment:
+  #     RABBITMQ_DEFAULT_USER: kduser
+  #     RABBITMQ_DEFAULT_PASS: kdP4ssw0rd
+  #   restart: always 
   #   networks:
   #     - mynetwork
+
+  angular-app:
+    container_name: angular-app
+    build:
+      context: .
+      dockerfile: ./angular/Dockerfile.Angular
+    image: your-angular-app-image:latest
+    ports:
+      - "4200:4200"
+    volumes:
+      - ./angular/app:/app
+    # command: ["npm", "start", "--host", "0.0.0.0"]
+    depends_on:
+      - dotnet-api
+    networks:
+      - mynetwork
 
   # kibana:
   #   container_name: kibana
