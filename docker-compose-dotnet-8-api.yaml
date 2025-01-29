@@ -1,0 +1,197 @@
+version: '3.8'
+
+services:
+  dotnet-8-api-1:
+    container_name: dotnet_8_api_1
+    build:
+      context: .
+      dockerfile: ./dotnet-8-api-1/Dockerfile.Dotnet8
+    # image: dotnet-6:latest 
+    ports:
+      - "8004:8004"
+    volumes:
+      - ./dotnet-8-api-1/app:/app
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8004
+    # depends_on:
+    #   - postgres
+    networks:
+      - mynetwork
+
+  dotnet-8-api-2:
+    container_name: dotnet_8_api_2
+    build:
+      context: .
+      dockerfile: ./dotnet-8-api-2/Dockerfile.Dotnet8
+    # image: dotnet-6:latest 
+    ports:
+      - "8005:8005"
+      # - "7268:7268"
+      # - "5281:5281"
+    volumes:
+      - ./dotnet-8-api-2/app:/app
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8005
+    # depends_on:
+    #   - postgres
+    networks:
+      - mynetwork    
+
+  azure-sql-edge:
+    image: mcr.microsoft.com/azure-sql-edge
+    container_name: azure-sql-edge
+    ports:
+      - "1433:1433"
+    environment:
+      ACCEPT_EULA: "Y" # Lisans sözleşmesini kabul et
+      SA_PASSWORD: "YourStrong!Passw0rd" # Güçlü bir şifre belirle     
+      TZ: "Etc/GMT-3" # GMT+3 zaman dilimi 
+    volumes:
+      - ./sql_data:/var/opt/mssql # Volume mount işlemi
+    networks:
+      - mynetwork
+    # dotnet tool install -g microsoft.sqlpackage
+    # export PATH="$PATH:$HOME/.dotnet/tools"
+    # sqlpackage /Action:Import /SourceFile:"otomotivdaiichi.bacpac" /TargetConnectionString:'Server=azure-sql-edge;Database=otomotivdaiichi;User Id=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True;'
+    # sqlpackage /Action:Import /SourceFile:"otomotivdaiichi.bacpac" /TargetConnectionString:'Server=localhost;Database=otomotivdaiichi_2;User Id=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True;'
+    # sqlpackage /Action:Import /SourceFile:"otomotivdaiichi.bacpac" /TargetConnectionString:'Server=172.18.228.86,1433;Database=otomotivdaiichi;User Id=dev_assembly_management_user;Password=eNV&kT8*Xc3-^C~<;TrustServerCertificate=True;'
+    # /TargetServerName:'azure-sql-edge' /TargetDatabaseName:otomotivdaiichi /TargetUser:sa /TargetPassword:'YourStrong!Passw0rd'
+ 
+  # azure-sql-edge-gmt-3:
+  #   image: mcr.microsoft.com/azure-sql-edge
+  #   container_name: azure-sql-edge-gmt-3
+  #   ports:
+  #     - "1434:1433"
+  #   environment:
+  #     ACCEPT_EULA: "Y" # Lisans sözleşmesini kabul et
+  #     SA_PASSWORD: "YourStrong!Passw0rd" # Güçlü bir şifre belirle      
+  #     TZ: "Etc/GMT-3" # GMT+3 zaman dilimi
+  #   volumes:
+  #     - ./azure-sql-edge-2:/var/opt/mssql # Volume mount işlemi
+  #   networks:
+  #     - mynetwork
+
+
+  # redis:
+  #   image: "redis:latest"
+  #   container_name: redis-container
+  #   ports:
+  #     - "6379:6379"
+  #   volumes:
+  #     - ./redis/redis-data:/data
+  #   restart: always    
+  #   networks:
+  #     - mynetwork    
+
+  # rabbitmq:
+  #   image: "rabbitmq:3-management"
+  #   container_name: "rabbitmq-container"
+  #   ports:
+  #     - "5672:5672"   # RabbitMQ default AMQP port
+  #     - "15672:15672" # RabbitMQ Management Plugin port
+  #   volumes:
+  #     - .rabbit/rabbitmq_data:/var/lib/rabbitmq
+  #   environment:
+  #     RABBITMQ_DEFAULT_USER: kduser
+  #     RABBITMQ_DEFAULT_PASS: kdP4ssw0rd
+  #   restart: always 
+  #   networks:
+  #     - mynetwork
+  # angular-app:
+  #   container_name: angular-app
+  #   build:
+  #     context: .
+  #     dockerfile: ./angular/Dockerfile.Angular
+  #   image: your-angular-app-image:latest
+  #   ports:
+  #     - "4200:4200"
+  #   volumes:
+  #     - ./angular/app:/app
+  #   # command: ["npm", "start", "--host", "0.0.0.0"]
+  #   depends_on:
+  #     - dotnet-api
+  #   networks:
+  #     - mynetwork
+
+  # kibana:
+  #   container_name: kibana
+  #   image: docker.elastic.co/kibana/kibana:8.14.3
+  #   ports:
+  #     - 5601:5601
+  #   depends_on:
+  #     - elasticsearch
+  #   environment:
+  #     - ELASTICSEARCH_URL=http://els:9200
+  #   networks:
+  #     - mynetwork
+
+  # elasticsearch:
+  #   container_name: els
+  #   image: docker.elastic.co/elasticsearch/elasticsearch:8.14.3
+  #   ports:
+  #     - 9200:9200
+  #   volumes:
+  #     - ./elasticsearch-data:/usr/share/elasticsearch/datafile
+  #   environment:
+  #     - discovery.type=single-node
+  #   networks:
+  #     - mynetwork
+
+
+  # postgres:
+  #   container_name: pg_container_dev
+  #   image: postgres:14
+  #   restart: always
+  #   environment:
+  #     POSTGRES_USER: root
+  #     POSTGRES_PASSWORD: root
+  #     POSTGRES_DB: booksdb
+  #   ports:
+  #     - 5432:5432
+  #   volumes:
+  #    - ./postgres/dbdata1:/var/lib/postgresql/data
+  #    - ./postgres/fdw:/fdw
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U root -d booksdb"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+  #   networks:
+  #     - mynetwork  
+
+  # db2:    
+  #   build:
+  #     context: .
+  #     dockerfile: ./db2/dockerfile.db2
+  #   networks:
+  #     - mynetwork
+  #   ports:
+  #     - "50000:50000"
+  #   volumes:
+  #    - ./db2/dbdata1:/database ibm-db2
+
+  # pgadmin:
+  #   build:
+  #     context: .
+  #     dockerfile: ./pgadmin/Dockerfile.PgAdmin
+  #   networks:
+  #     - mynetwork
+  #   ports:
+  #     - "5050:5050"
+  #   depends_on:
+  #     - postgres
+
+  # nginx:
+  #   build:
+  #     context: ./nginx
+  #   ports:
+  #     - "80:80"
+  #   networks:
+  #     - mynetwork
+
+networks:   
+  mynetwork:
+    driver: bridge
+

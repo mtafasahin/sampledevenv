@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+
+  postgres:
+    container_name: pg_container_dev
+    image: postgres:14
+    restart: always
+    environment:
+      POSTGRES_USER: egitimhane
+      POSTGRES_PASSWORD: egitimhane
+      POSTGRES_DB: egitimhane
+    ports:
+      - 5432:5432
+    volumes:
+     - ./egitimhanepostgres/dbdata1:/var/lib/postgresql/data     
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U root -d booksdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - mynetwork  
+
+  pgadmin:
+    build:
+      context: .
+      dockerfile: ./pgadmin/Dockerfile.PgAdmin
+    networks:
+      - mynetwork
+    ports:
+      - "5050:5050"
+    depends_on:
+      - postgres
+
+networks:   
+  mynetwork:
+    driver: bridge
+
